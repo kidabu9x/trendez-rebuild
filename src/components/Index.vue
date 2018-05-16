@@ -56,55 +56,57 @@
           </md-list>
         </md-app-drawer>
         <md-app-content>
-          <div class="container" style="margin-top: 60px;">
-            <ul>
-              <li v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                <md-card>
-                    <md-card-header>
-                        <md-avatar>
-                            <img :src="post.publisherAvatar" :alt="post.publisher">
-                        </md-avatar>
-                        <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
-                        <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
-                    </md-card-header>
+          <div>
+            <!-- <ul> -->
+              <isotope>
+                <div v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
+                  <md-card style="max-width: 360px">
+                      <md-card-header>
+                          <md-avatar>
+                              <img :src="post.publisherAvatar" :alt="post.publisher">
+                          </md-avatar>
+                          <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
+                          <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
+                      </md-card-header>
 
-                    <md-card-media v-if="post.picture">
-                        <md-card-media>
-                            <img :src="post.picture">
-                        </md-card-media>
-                    </md-card-media>
+                      <md-card-media v-if="post.picture">
+                          <md-card-media>
+                              <img :src="post.picture">
+                          </md-card-media>
+                      </md-card-media>
 
-                    <md-card-content>
-                        {{post.message}}
-                    </md-card-content>
+                      <md-card-content>
+                          {{post.message}}
+                      </md-card-content>
 
-                    <md-card-actions>
-                        <md-button>
-                          <span style="vertical-align:middle; color: #ee5253; margin: auto;">
-                            <i class="material-icons">favorite_border</i>
-                            {{post.like_count}}
-                          </span>
-                        </md-button>
-                        <md-button>
-                          <span style="vertical-align:middle; margin: auto; color: #576574;">
-                            <i class="material-icons">comment</i>
-                            {{post.comment_count}}
-                          </span>
-                        </md-button>
-                        <md-button>
-                          <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
-                            <i class="material-icons">bookmark_border</i>
-                            {{post.share_count}}
-                          </span>
-                        </md-button>
-                        <md-button class="ml-auto">
-                          <md-switch class="md-success">Lưu</md-switch>
-                        </md-button>
-                    </md-card-actions>
-                </md-card>
-              </li>
+                      <md-card-actions>
+                          <md-button>
+                            <span style="vertical-align:middle; color: #ee5253; margin: auto;">
+                              <i class="material-icons">favorite_border</i>
+                              {{post.like_count}}
+                            </span>
+                          </md-button>
+                          <md-button>
+                            <span style="vertical-align:middle; margin: auto; color: #576574;">
+                              <i class="material-icons">comment</i>
+                              {{post.comment_count}}
+                            </span>
+                          </md-button>
+                          <md-button>
+                            <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
+                              <i class="material-icons">bookmark_border</i>
+                              {{post.share_count}}
+                            </span>
+                          </md-button>
+                          <md-button class="ml-auto">
+                            <md-switch class="md-success">Lưu</md-switch>
+                          </md-button>
+                      </md-card-actions>
+                  </md-card>
+                </div>
+              </isotope>  
               <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
-            </ul>
+            <!-- </ul> -->
           </div>
         </md-app-content>
       </md-app>
@@ -162,6 +164,7 @@
 
 <script>
 import InfiniteLoading from 'vue-infinite-loading'
+import isotope from 'vueisotope'
 export default {
   name: 'Index',
   data () {
@@ -199,7 +202,7 @@ export default {
         this.posts = []
         this.$http.get('https://trendez-server.herokuapp.com/api/get-posts').then((response) => {
           this.restPosts = response.body
-          this.posts = this.restPosts.slice(0, 10)
+          this.posts = this.restPosts.slice(1, 10)
         })
       }
     },
@@ -220,7 +223,8 @@ export default {
     }
   },
   components: {
-    InfiniteLoading
+    InfiniteLoading,
+    isotope
   }
 }
 </script>
