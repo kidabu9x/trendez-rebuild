@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
+import PersistentMini from '@/components/Draft'
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.min.css'
 import VueResource from 'vue-resource'
@@ -18,6 +19,11 @@ export default new Router({
       path: '/',
       name: 'Index',
       component: Index
+    },
+    {
+      path: '/test',
+      name: 'PersistentMini',
+      component: PersistentMini
     }
   ]
 })
