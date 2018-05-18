@@ -5,13 +5,12 @@
           <md-button class="md-icon-button" @click="toggleMenu" v-if="!menuVisible">
             <md-icon>menu</md-icon>
           </md-button>
-          <span class="md-title">TRENDEZ</span>
+          <span class="md-title" >{{title}}</span>
           <md-button class="ml-auto" data-toggle="modal" data-target="#loginModal" v-if="!user">Đăng kí/Đăng nhập</md-button>
         </md-app-toolbar>
         <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini" class="fixed-top">
           <md-toolbar class="md-transparent" md-elevation="0">
             <span>Danh mục</span>
-
             <div class="md-toolbar-section-end">
               <md-button class="md-icon-button md-dense" @click="toggleMenu">
                 <md-icon>keyboard_arrow_left</md-icon>
@@ -19,6 +18,10 @@
             </div>
           </md-toolbar>
           <md-list>
+            <md-list-item v-on:click="getPosts()">
+              <md-icon>home</md-icon>
+              <span class="md-list-item-text">Tổng hợp</span>
+            </md-list-item>
             <md-list-item v-on:click="getPosts('news')">
               <md-icon>chrome_reader_mode</md-icon>
               <span class="md-list-item-text">Tin tức</span>
@@ -39,17 +42,17 @@
               <span class="md-list-item-text">Phim ảnh</span>
             </md-list-item>
 
-            <md-list-item v-on:click="getPosts('news')">
+            <md-list-item v-on:click="getPosts('sport')">
               <md-icon>pool</md-icon>
               <span class="md-list-item-text">Thể thao</span>
             </md-list-item>
 
-            <md-list-item v-on:click="getPosts('news')">
+            <md-list-item v-on:click="getSavedPosts()">
               <md-icon>bookmark</md-icon>
               <span class="md-list-item-text">Bài đã lưu</span>
             </md-list-item>
 
-            <md-list-item v-on:click="getPosts('news')">
+            <md-list-item v-on:click="getFollowPages()">
               <md-icon>subscriptions</md-icon>
               <span class="md-list-item-text">Trang theo dõi</span>
             </md-list-item>
@@ -58,53 +61,63 @@
         <md-app-content>
           <div>
             <!-- <ul> -->
-              <isotope>
-                <div v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                  <md-card style="max-width: 360px">
-                      <md-card-header>
-                          <md-avatar>
-                              <img :src="post.publisherAvatar" :alt="post.publisher">
-                          </md-avatar>
-                          <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
-                          <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
-                      </md-card-header>
+              <div v-if="isLoading">
+                <fulfilling-square-spinner
+                    :animation-duration="4000"
+                    :size="50"
+                    color="#FF8800"
+                    style="display: block; margin: 50px auto auto auto;"
+                  />
+              </div>
+              <div v-else>
+                <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
+                  <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
+                    <md-card style="max-width: 360px">
+                        <md-card-header>
+                            <md-avatar>
+                                <img :src="post.publisherAvatar" :alt="post.publisher">
+                            </md-avatar>
+                            <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
+                            <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
+                        </md-card-header>
 
-                      <md-card-media v-if="post.picture">
-                          <md-card-media>
-                              <img :src="post.picture">
-                          </md-card-media>
-                      </md-card-media>
+                        <md-card-media v-if="post.picture">
+                            <md-card-media>
+                                <img :src="post.picture">
+                            </md-card-media>
+                        </md-card-media>
 
-                      <md-card-content>
-                          {{post.message}}
-                      </md-card-content>
+                        <md-card-content>
+                            {{post.message}}
+                        </md-card-content>
 
-                      <md-card-actions>
-                          <md-button>
-                            <span style="vertical-align:middle; color: #ee5253; margin: auto;">
-                              <i class="material-icons">favorite_border</i>
-                              {{post.like_count}}
-                            </span>
-                          </md-button>
-                          <md-button>
-                            <span style="vertical-align:middle; margin: auto; color: #576574;">
-                              <i class="material-icons">comment</i>
-                              {{post.comment_count}}
-                            </span>
-                          </md-button>
-                          <md-button>
-                            <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
-                              <i class="material-icons">bookmark_border</i>
-                              {{post.share_count}}
-                            </span>
-                          </md-button>
-                          <md-button class="ml-auto">
-                            <md-switch class="md-success">Lưu</md-switch>
-                          </md-button>
-                      </md-card-actions>
-                  </md-card>
+                        <md-card-actions>
+                            <md-button>
+                              <span style="vertical-align:middle; color: #ee5253; margin: auto;">
+                                <i class="material-icons">favorite_border</i>
+                                {{post.like_count}}
+                              </span>
+                            </md-button>
+                            <md-button>
+                              <span style="vertical-align:middle; margin: auto; color: #576574;">
+                                <i class="material-icons">comment</i>
+                                {{post.comment_count}}
+                              </span>
+                            </md-button>
+                            <md-button>
+                              <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
+                                <i class="material-icons">bookmark_border</i>
+                                {{post.share_count}}
+                              </span>
+                            </md-button>
+                            <md-button class="ml-auto">
+                              <md-switch class="md-success">Lưu</md-switch>
+                            </md-button>
+                        </md-card-actions>
+                    </md-card>
+                  </div>
                 </div>
-              </isotope>  
+              </div>
               <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
             <!-- </ul> -->
           </div>
@@ -120,39 +133,7 @@
                 </button>
               </div>
               <div class="modal-body">
-                <form>
-                  <p class="h4 text-center mb-4">Sign up</p>
-                  <!-- Material input text -->
-                  <div class="md-form">
-                    <i class="fa fa-user prefix grey-text"></i>
-                    <input type="text" id="materialFormRegisterNameEx" class="form-control">
-                    <label for="materialFormRegisterNameEx">Your name</label>
-                  </div>
-                  <!-- Material input email -->
-                  <div class="md-form">
-                    <i class="fa fa-envelope prefix grey-text"></i>
-                    <input type="email" id="materialFormRegisterEmailEx" class="form-control">
-                    <label for="materialFormRegisterEmailEx">Your email</label>
-                  </div>
-
-                  <!-- Material input email -->
-                  <div class="md-form">
-                    <i class="fa fa-exclamation-triangle prefix grey-text"></i>
-                    <input type="email" id="materialFormRegisterConfirmEx" class="form-control">
-                    <label for="materialFormRegisterConfirmEx">Confirm your email</label>
-                  </div>
-
-                  <!-- Material input password -->
-                  <div class="md-form">
-                    <i class="fa fa-lock prefix grey-text"></i>
-                    <input type="password" id="materialFormRegisterPasswordEx" class="form-control">
-                    <label for="materialFormRegisterPasswordEx">Your password</label>
-                  </div>
-
-                  <div class="text-center mt-4">
-                    <button class="btn btn-primary" type="submit">Register</button>
-                  </div>
-                </form>
+                <login-form :title="title"></login-form>
               </div>
               <div class="modal-footer">
               </div>
@@ -163,18 +144,23 @@
 </template>
 
 <script>
+/* global $:true */
+/* eslint no-undef: "error" */
 import InfiniteLoading from 'vue-infinite-loading'
-import isotope from 'vueisotope'
+import { FulfillingSquareSpinner } from 'epic-spinners'
+import LoginForm from './Login'
 export default {
   name: 'Index',
   data () {
     return {
+      title: 'TRENDEZ',
       posts: [],
       restPosts: [],
       count: 0,
       searchText: '',
       user: null,
-      menuVisible: false
+      menuVisible: true,
+      isLoading: true
     }
   },
   computed: {
@@ -193,14 +179,18 @@ export default {
   },
   methods: {
     getPosts: function (category) {
+      this.isLoading = true
       if (category) {
         this.posts = []
         this.$http.get(`https://trendez-server.herokuapp.com/api/get-posts?category=${category}`).then((response) => {
+          this.isLoading = false
           this.restPosts = response.body
+          this.posts = this.restPosts.slice(1, 10)
         })
       } else {
         this.posts = []
         this.$http.get('https://trendez-server.herokuapp.com/api/get-posts').then((response) => {
+          this.isLoading = false
           this.restPosts = response.body
           this.posts = this.restPosts.slice(1, 10)
         })
@@ -220,11 +210,35 @@ export default {
     },
     toggleMenu () {
       this.menuVisible = !this.menuVisible
+    },
+    getSavedPosts: function () {
+      if (!this.user) {
+        this.showToast()
+      }
+    },
+    getFollowPages: function () {
+      if (!this.user) {
+        this.showToast()
+      }
+    },
+    showToast: function () {
+      this.$toasted.error('Oops... Bạn cần đăng nhập trước nhé !', {
+        theme: 'bubble',
+        position: 'top-right',
+        duration: 3000,
+        action: {
+          icon: 'fingerprint',
+          onClick: () => {
+            $('#loginModal').modal('toggle')
+          }
+        }
+      })
     }
   },
   components: {
+    LoginForm,
     InfiniteLoading,
-    isotope
+    FulfillingSquareSpinner
   }
 }
 </script>
@@ -251,6 +265,11 @@ p {
 a {
   color: #42b983;
 }
+
+.items {
+  margin: 5px;
+}
+
 .md-card {
   width: 100%;
   margin: 4px;
