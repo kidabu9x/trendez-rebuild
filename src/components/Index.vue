@@ -6,7 +6,7 @@
             <md-icon>menu</md-icon>
           </md-button>
           <span class="md-title" >{{title}}</span>
-          <md-button class="ml-auto" data-toggle="modal" data-target="#loginModal" v-if="!user">Đăng kí/Đăng nhập</md-button>
+          <md-button class="ml-auto" @click="showDialog = true" v-if="!user">Đăng kí/Đăng nhập</md-button>
         </md-app-toolbar>
         <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini" class="fixed-top">
           <md-toolbar class="md-transparent" md-elevation="0">
@@ -111,7 +111,9 @@
                               </span>
                             </md-button>
                             <md-button class="ml-auto">
-                              <md-switch class="md-success">Lưu</md-switch>
+                              <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
+                                <i class="material-icons">description</i>
+                              </a>
                             </md-button>
                         </md-card-actions>
                     </md-card>
@@ -123,23 +125,7 @@
           </div>
         </md-app-content>
       </md-app>
-        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">Chào mừng bạn đến với TrendEz !</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <login-form :title="title"></login-form>
-              </div>
-              <div class="modal-footer">
-              </div>
-            </div>
-          </div>
-        </div>
+      <login-form :showDialog="showDialog" @closeDialog="closeDialog"></login-form>
     </div>
 </template>
 
@@ -160,7 +146,8 @@ export default {
       searchText: '',
       user: null,
       menuVisible: true,
-      isLoading: true
+      isLoading: true,
+      showDialog: false
     }
   },
   computed: {
@@ -233,6 +220,9 @@ export default {
           }
         }
       })
+    },
+    closeDialog: function (status) {
+      this.showDialog = status
     }
   },
   components: {
@@ -245,6 +235,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+// @import "~vue-material/dist/theme/engine";
+
+// @include md-register-theme("default", (
+//   primary: md-get-palette-color(blue, A200)
+// ));
+
+// @import "~vue-material/dist/theme/all";
 h1, h2 {
   font-weight: normal;
 }
@@ -343,5 +340,8 @@ a {
 .md-drawer {
   width: 230px;
   max-width: calc(100vw - 125px);
+}
+.md-card-drawer {
+  position: sticky;
 }
 </style>
