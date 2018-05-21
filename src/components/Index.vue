@@ -5,8 +5,8 @@
           <md-button class="md-icon-button" @click="toggleMenu" v-if="!menuVisible">
             <md-icon>menu</md-icon>
           </md-button>
-          <span class="md-title" >{{title}}</span>
-          <md-button class="ml-auto" @click="showDialog = true" v-if="!user">Đăng kí/Đăng nhập</md-button>
+          <span class="md-title" style="flex: 1">{{title}}</span>
+          <md-button @click="showDialog = true" v-if="!user">Đăng kí/Đăng nhập</md-button>
         </md-app-toolbar>
         <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini" class="fixed-top">
           <md-toolbar class="md-transparent" md-elevation="0">
@@ -60,68 +60,66 @@
         </md-app-drawer>
         <md-app-content>
           <div>
-            <!-- <ul> -->
-              <div v-if="isLoading">
-                <fulfilling-square-spinner
-                    :animation-duration="4000"
-                    :size="50"
-                    color="#FF8800"
-                    style="display: block; margin: 50px auto auto auto;"
-                  />
-              </div>
-              <div v-else>
-                <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
-                  <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                    <md-card style="max-width: 360px">
-                        <md-card-header>
-                            <md-avatar>
-                                <img :src="post.publisherAvatar" :alt="post.publisher">
-                            </md-avatar>
-                            <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
-                            <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
-                        </md-card-header>
+            <div v-if="isLoading">
+              <fulfilling-square-spinner
+                  :animation-duration="4000"
+                  :size="50"
+                  color="#FF8800"
+                  style="display: block; margin: 50px auto auto auto;"
+                />
+            </div>
+            <div v-else>
+              <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
+                <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
+                  <md-card style="max-width: 360px">
+                      <md-card-header>
+                          <md-avatar>
+                              <img :src="post.publisherAvatar" :alt="post.publisher">
+                          </md-avatar>
+                          <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
+                          <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
+                      </md-card-header>
 
-                        <md-card-media v-if="post.picture">
-                            <md-card-media>
-                                <img :src="post.picture">
-                            </md-card-media>
-                        </md-card-media>
+                      <md-card-media v-if="post.picture">
+                          <md-card-media>
+                              <img :src="post.picture">
+                          </md-card-media>
+                      </md-card-media>
 
-                        <md-card-content>
-                            {{post.message}}
-                        </md-card-content>
+                      <md-card-content>
+                          {{post.message}}
+                      </md-card-content>
 
-                        <md-card-actions>
-                            <md-button>
-                              <span style="vertical-align:middle; color: #ee5253; margin: auto;">
-                                <i class="material-icons">favorite_border</i>
-                                {{post.like_count}}
-                              </span>
-                            </md-button>
-                            <md-button>
-                              <span style="vertical-align:middle; margin: auto; color: #576574;">
-                                <i class="material-icons">comment</i>
-                                {{post.comment_count}}
-                              </span>
-                            </md-button>
-                            <md-button>
-                              <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
-                                <i class="material-icons">bookmark_border</i>
-                                {{post.share_count}}
-                              </span>
-                            </md-button>
-                            <md-button class="ml-auto">
-                              <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
-                                <i class="material-icons">description</i>
-                              </a>
-                            </md-button>
-                        </md-card-actions>
-                    </md-card>
-                  </div>
+                      <md-card-actions>
+                          <md-button>
+                            <span style="vertical-align:middle; color: #ee5253; margin: auto;">
+                              <i class="material-icons">favorite_border</i>
+                              {{post.like_count}}
+                            </span>
+                          </md-button>
+                          <md-button>
+                            <span style="vertical-align:middle; margin: auto; color: #576574;">
+                              <i class="material-icons">comment</i>
+                              {{post.comment_count}}
+                            </span>
+                          </md-button>
+                          <md-button>
+                            <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
+                              <i class="material-icons">bookmark_border</i>
+                              {{post.share_count}}
+                            </span>
+                          </md-button>
+                          <md-button class="ml-auto">
+                            <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
+                              <i class="material-icons">description</i>
+                            </a>
+                          </md-button>
+                      </md-card-actions>
+                  </md-card>
                 </div>
               </div>
-              <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
-            <!-- </ul> -->
+            </div>
+            <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
           </div>
         </md-app-content>
       </md-app>
@@ -168,13 +166,19 @@ export default {
     getPosts: function (category) {
       this.isLoading = true
       if (category) {
+        this.changeTitle(category)
         this.posts = []
         this.$http.get(`https://trendez-server.herokuapp.com/api/get-posts?category=${category}`).then((response) => {
           this.isLoading = false
           this.restPosts = response.body
-          this.posts = this.restPosts.slice(1, 10)
+          if (this.restPosts.length >= 10) {
+            this.posts = this.restPosts.slice(1, 10)
+          } else {
+            this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
+          }
         })
       } else {
+        this.title = 'TRENDEZ'
         this.posts = []
         this.$http.get('https://trendez-server.herokuapp.com/api/get-posts').then((response) => {
           this.isLoading = false
@@ -184,16 +188,24 @@ export default {
       }
     },
     showPosts: function ($state) {
-      setTimeout(() => {
-        if (this.count + 10 < this.restPosts.length) {
-          this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + 10))
-          this.count += 10
-        } else {
-          this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + (this.restPosts.length - this.count)))
-          this.count += this.restPosts.length - this.count
-        }
-        $state.loaded()
-      }, 1000)
+      // console.log('qeqweqwe')/
+      // setTimeout(() => {
+      //   if (this.count + 10 < this.restPosts.length) {
+      //     this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + 10))
+      //     this.count += 10
+      //   } else {
+      //     this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + (this.restPosts.length - this.count)))
+      //     this.count += this.restPosts.length - this.count
+      //   }
+      //   $state.loaded()
+      // }, 1000)
+    },
+    changeTitle (category) {
+      if (category === 'news') this.title = 'TIN TỨC'
+      if (category === 'food') this.title = 'ĂN UỐNG'
+      if (category === 'fashion') this.title = 'THỜI TRANG'
+      if (category === 'film') this.title = 'PHIM ẢNH'
+      if (category === 'sport') this.title = 'THỂ THAO'
     },
     toggleMenu () {
       this.menuVisible = !this.menuVisible
@@ -233,15 +245,14 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-// @import "~vue-material/dist/theme/engine";
+@import "~vue-material/dist/theme/engine";
 
-// @include md-register-theme("default", (
-//   primary: md-get-palette-color(blue, A200)
-// ));
+@include md-register-theme("default", (
+  primary: md-get-palette-color(blue, A200)
+));
 
-// @import "~vue-material/dist/theme/all";
+@import "~vue-material/dist/theme/all";
 h1, h2 {
   font-weight: normal;
 }

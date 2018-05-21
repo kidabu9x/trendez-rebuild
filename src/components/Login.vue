@@ -3,8 +3,38 @@
     <md-dialog :md-active.sync="show" @md-closed="updateShowDialog" :md-backdrop='true'>
       <md-dialog-title>Chào mừng bạn đến với TrendEz</md-dialog-title>
 
-      <md-tabs md-dynamic-height>
-        <md-tab md-label="Đăng kí">
+      <md-tabs md-dynamic-height md-alignment="centered">
+        <md-tab md-label="Đăng nhập" md-icon='timeline'>
+          <form novalidate class="md-layout" @submit.prevent="validateUser">
+            <md-card class="md-layout-item">
+              <md-card-header>
+              </md-card-header>
+
+              <md-card-content>
+                <md-field :class="getValidationClass('username')">
+                  <label for="loginUsername">Tên đăng nhập</label>
+                  <md-input type="username" name="username" id="loginUsername" autocomplete="username" v-model="loginForm.username" :disabled="sending" />
+                  <span class="md-error" v-if="!$v.loginForm.username.required">*Bắt buộc</span>
+                </md-field>
+
+                <md-field :class="getValidationClass('password')">
+                  <label for="loginPassword">Mật khẩu</label>
+                  <md-input type="password" name="password" id="loginPassword" autocomplete="password" v-model="loginForm.password" :disabled="sending" />
+                  <span class="md-error" v-if="!$v.loginForm.password.required">*Bắt buộc</span>
+                </md-field>
+              </md-card-content>
+
+              <md-progress-bar md-mode="indeterminate" v-if="sending" />
+
+              <md-card-actions>
+                <md-button type="submit" class="md-primary" :disabled="sending">Đăng nhập</md-button>
+              </md-card-actions>
+            </md-card>
+
+            <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
+          </form>
+        </md-tab>
+        <md-tab md-label="Đăng ký" md-icon='create'>
           <form novalidate class="md-layout" @submit.prevent="validateUser">
             <md-card class="md-layout-item">
               <md-card-header>
@@ -32,15 +62,15 @@
                 </div>
 
                 <md-field :class="getValidationClass('username')">
-                  <label for="username">Tên đăng nhập</label>
-                  <md-input type="username" name="username" id="username" autocomplete="username" v-model="registerForm.username" :disabled="sending" />
+                  <label for="registerUsername">Tên đăng nhập</label>
+                  <md-input type="username" name="username" id="registerUsername" autocomplete="username" v-model="registerForm.username" :disabled="sending" />
                   <span class="md-error" v-if="!$v.registerForm.username.required">*Bắt buộc</span>
                   <span class="md-error" v-else-if="!$v.registerForm.username.username">*Không hợp lệ</span>
                 </md-field>
 
                 <md-field :class="getValidationClass('password')">
-                  <label for="password">Mật khẩu</label>
-                  <md-input type="password" name="password" id="password" autocomplete="password" v-model="registerForm.password" :disabled="sending" />
+                  <label for="registerPassword">Mật khẩu</label>
+                  <md-input type="password" name="password" id="registerPassword" autocomplete="password" v-model="registerForm.password" :disabled="sending" />
                   <span class="md-error" v-if="!$v.registerForm.password.required">*Bắt buộc</span>
                   <span class="md-error" v-else-if="!$v.registerForm.password.password">*Mật khẩu không hợp lệ</span>
                 </md-field>
@@ -49,15 +79,16 @@
               <md-progress-bar md-mode="indeterminate" v-if="sending" />
 
               <md-card-actions>
-                <md-button type="submit" class="md-primary" :disabled="sending">Create user</md-button>
+                <md-button type="submit" class="md-primary" :disabled="sending">Đăng ký</md-button>
               </md-card-actions>
             </md-card>
 
             <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
           </form>
         </md-tab>
-
-        <md-tab md-label="Đăng nhập">
+        <md-tab md-label="or" md-disabled>
+        </md-tab>
+        <md-tab md-label="Đăng nhập bằng Facebook" md-icon='timeline'>
         </md-tab>
 
       </md-tabs>
@@ -114,6 +145,14 @@ export default {
       password: {
         required
       }
+    },
+    loginForm: {
+      username: {
+        required
+      },
+      password: {
+        required
+      }
     }
   },
   methods: {
@@ -129,7 +168,7 @@ export default {
         }
       }
     },
-    clearForm () {
+    clearRegisterForm () {
       this.$v.$reset()
       this.registerForm.firstName = null
       this.registerForm.lastName = null
@@ -137,7 +176,7 @@ export default {
       this.registerForm.password = null
       this.registerForm.avatar = null
     },
-    saveUser () {
+    register () {
       this.sending = true
 
       // Instead of this timeout, here you can call your API
@@ -145,7 +184,7 @@ export default {
         this.lastUser = `${this.form.firstName} ${this.form.lastName}`
         this.userSaved = true
         this.sending = false
-        this.clearForm()
+        this.clearRegisterForm()
       }, 1500)
     },
     validateUser () {
