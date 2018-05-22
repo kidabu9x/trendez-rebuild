@@ -1,11 +1,11 @@
 <template>
   <div>
     <md-dialog :md-active.sync="show" @md-closed="updateShowDialog" :md-backdrop='true'>
-      <md-dialog-title>Chào mừng bạn đến với TrendEz</md-dialog-title>
+      <md-dialog-title></md-dialog-title>
 
       <md-tabs md-dynamic-height md-alignment="centered">
-        <md-tab md-label="Đăng nhập" md-icon='timeline'>
-          <form novalidate class="md-layout" @submit.prevent="validateUser">
+        <md-tab md-label="Đăng nhập" md-icon='fingerprint'>
+          <form novalidate class="md-layout" @submit.prevent="validateLoginUser">
             <md-card class="md-layout-item">
               <md-card-header>
               </md-card-header>
@@ -30,12 +30,10 @@
                 <md-button type="submit" class="md-primary" :disabled="sending">Đăng nhập</md-button>
               </md-card-actions>
             </md-card>
-
-            <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
           </form>
         </md-tab>
         <md-tab md-label="Đăng ký" md-icon='create'>
-          <form novalidate class="md-layout" @submit.prevent="validateUser">
+          <form novalidate class="md-layout" @submit.prevent="validateRegisterUser">
             <md-card class="md-layout-item">
               <md-card-header>
               </md-card-header>
@@ -74,6 +72,11 @@
                   <span class="md-error" v-if="!$v.registerForm.password.required">*Bắt buộc</span>
                   <span class="md-error" v-else-if="!$v.registerForm.password.password">*Mật khẩu không hợp lệ</span>
                 </md-field>
+
+                <md-field>
+                  <label for="registerAvatar">Link ảnh đại diện</label>
+                  <md-input type="text" name="avatar" id="registerAvatar" autocomplete="password" v-model="registerForm.avatar" :disabled="sending" />
+                </md-field>
               </md-card-content>
 
               <md-progress-bar md-mode="indeterminate" v-if="sending" />
@@ -83,12 +86,19 @@
               </md-card-actions>
             </md-card>
 
-            <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
           </form>
         </md-tab>
         <md-tab md-label="or" md-disabled>
         </md-tab>
         <md-tab md-label="Đăng nhập bằng Facebook" md-icon='timeline'>
+          <template>
+            <fb-signin-button
+              :params="fbSignInParams"
+              @success="onSignInSuccess"
+              @error="onSignInError">
+              ĐĂNG NHẬP BẰNG FACEBOOK
+            </fb-signin-button>
+          </template>
         </md-tab>
 
       </md-tabs>
@@ -97,17 +107,18 @@
 </template>
 
 <script>
+/* global FB */
 import { validationMixin } from 'vuelidate'
 import {
   required,
   minLength
-  // maxLength
 } from 'vuelidate/lib/validators'
 export default {
   name: 'FormValidation',
   mixins: [validationMixin],
   props: ['showDialog'],
   data: () => ({
+    apiUrl: 'https://trendez-server.herokuapp.com/',
     show: this.showDialog,
     registerForm: {
       firstName: null,
@@ -120,9 +131,12 @@ export default {
       username: null,
       password: null
     },
-    userSaved: false,
     sending: false,
-    lastUser: null
+    lastUser: null,
+    fbSignInParams: {
+      scope: 'email',
+      return_scopes: true
+    }
   }),
   watch: {
     showDialog: function (n, o) {
@@ -161,12 +175,73 @@ export default {
     },
     getValidationClass (fieldName) {
       const field = this.$v.registerForm[fieldName]
-
       if (field) {
         return {
           'md-invalid': field.$invalid && field.$dirty
         }
       }
+    },
+    validateLoginUser () {
+      this.$v.loginForm.$touch()
+      if (!this.$v.loginForm.$invalid) {
+        this.login()
+      }
+    },
+    login () {
+      this.sending = true
+      this.$http.post(`${this.apiUrl}/api/login`, {
+        username: this.loginForm.username,
+        password: this.loginForm.password
+      }).then((res) => {
+        console.log(res.body)
+        this.sending = false
+        if (!res.ok) {
+          this.showErrorToast('Lỗi hệ thống !')
+        } else if (res.body.error) {
+          this.showErrorToast(res.body.error)
+        } else {
+          this.lastUser = res.body.user
+          this.clearLoginForm()
+          this.updateShowDialog()
+          this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} quay trở lại !`)
+          this.$emit('userLoggedIn', this.lastUser)
+        }
+      })
+    },
+    clearLoginForm () {
+      this.$v.$reset()
+      this.loginForm.username = null
+      this.loginForm.password = null
+    },
+    validateRegisterUser () {
+      this.$v.registerForm.$touch()
+      if (!this.$v.registerForm.$invalid) {
+        this.register()
+      }
+    },
+    register () {
+      this.sending = true
+      this.$http.post(`${this.apiUrl}/api/register`, {
+        firstName: this.registerForm.firstName,
+        lastName: this.registerForm.lastName,
+        username: this.registerForm.username,
+        password: this.registerForm.password,
+        avatar: this.registerForm.avatar
+      }).then((res) => {
+        console.log(res.body)
+        this.sending = false
+        if (!res.ok) {
+          this.showErrorToast('Lỗi hệ thống !')
+        } else if (res.body.error) {
+          this.showErrorToast(res.body.error)
+        } else {
+          this.lastUser = res.body.user
+          this.clearRegisterForm()
+          this.updateShowDialog()
+          this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} đến với TRENDEZ !`)
+          this.$emit('userLoggedIn', this.lastUser)
+        }
+      })
     },
     clearRegisterForm () {
       this.$v.$reset()
@@ -176,23 +251,46 @@ export default {
       this.registerForm.password = null
       this.registerForm.avatar = null
     },
-    register () {
-      this.sending = true
-
-      // Instead of this timeout, here you can call your API
-      window.setTimeout(() => {
-        this.lastUser = `${this.form.firstName} ${this.form.lastName}`
-        this.userSaved = true
-        this.sending = false
-        this.clearRegisterForm()
-      }, 1500)
+    showErrorToast: function (message) {
+      this.$toasted.error(message, {
+        theme: 'bubble',
+        position: 'top-right',
+        duration: 3000
+      })
     },
-    validateUser () {
-      this.$v.$touch()
-
-      if (!this.$v.$invalid) {
-        this.saveUser()
-      }
+    showSuccessToast: function (message) {
+      this.$toasted.success(message, {
+        theme: 'bubble',
+        position: 'top-right',
+        duration: 3000
+      })
+    },
+    onSignInSuccess (res) {
+      let userID = res.authResponse.userID
+      console.log(userID)
+      FB.api(`/${userID}?fields=name,first_name,last_name,picture{url}`, doc => {
+        let checkUser = {
+          user: {
+            username: doc.id,
+            firstName: doc.first_name,
+            lastName: doc.last_name,
+            avatar: doc.picture.data.url
+          }
+        }
+        this.$http.post(`${this.apiUrl}/api/facebook-log-in`, checkUser).then(data => {
+          if (data.body.error) {
+            this.showErrorToast(data.error)
+          } else {
+            this.lastUser = data.body.user
+            this.updateShowDialog()
+            this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} đến với TRENDEZ !`)
+            this.$emit('userLoggedIn', this.lastUser)
+          }
+        })
+      })
+    },
+    onSignInError () {
+      this.showErrorToast('Đăng nhập không thành công !')
     }
   }
 }
@@ -214,5 +312,14 @@ export default {
   top: 0;
   right: 0;
   left: 0;
+}
+.fb-signin-button {
+  border-radius: 3px;
+  color: #448aff;
+  display: block;
+  margin: 30px auto;
+  cursor: pointer;
+  max-width: 160px;
+  size: 16px;
 }
 </style>

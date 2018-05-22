@@ -1,14 +1,24 @@
 <template>
-    <div>
-      <md-app>
+    <div class="page-container">
+      <md-app md-waterfall md-mode="fixed">
         <md-app-toolbar class="md-accent" md-elevation="1">
           <md-button class="md-icon-button" @click="toggleMenu" v-if="!menuVisible">
             <md-icon>menu</md-icon>
           </md-button>
-          <span class="md-title" style="flex: 1">{{title}}</span>
-          <md-button @click="showDialog = true" v-if="!user">Đăng kí/Đăng nhập</md-button>
+          <span class="md-title">{{title}}</span>
+          <div class="md-toolbar-section-end">
+            <md-button @click="showDialog = true" class="md-primary" v-if="!user">
+              Đăng kí/Đăng nhập
+            </md-button>
+            <md-button class="md-primary" v-else-if="user">
+              <md-avatar class="md-small">
+                <img :src="user.avatar">
+              </md-avatar>
+              <span>{{user.firstName}} {{user.lastName}}</span>
+            </md-button>
+          </div>
         </md-app-toolbar>
-        <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini" class="fixed-top">
+        <md-app-drawer :md-active.sync="menuVisible" md-persistent="mini">
           <md-toolbar class="md-transparent" md-elevation="0">
             <span>Danh mục</span>
             <div class="md-toolbar-section-end">
@@ -46,7 +56,7 @@
               <md-icon>pool</md-icon>
               <span class="md-list-item-text">Thể thao</span>
             </md-list-item>
-
+            <md-divider></md-divider>
             <md-list-item v-on:click="getSavedPosts()">
               <md-icon>bookmark</md-icon>
               <span class="md-list-item-text">Bài đã lưu</span>
@@ -58,7 +68,7 @@
             </md-list-item>
           </md-list>
         </md-app-drawer>
-        <md-app-content>
+        <md-app-content class="md-scrollbar">
           <div>
             <div v-if="isLoading">
               <fulfilling-square-spinner
@@ -69,61 +79,65 @@
                 />
             </div>
             <div v-else>
+              <md-field>
+                <label>Tìm kiếm...</label>
+                <md-input v-model="searchText"></md-input>
+              </md-field>
               <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
                 <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                  <md-card style="max-width: 360px">
-                      <md-card-header>
-                          <md-avatar>
-                              <img :src="post.publisherAvatar" :alt="post.publisher">
-                          </md-avatar>
-                          <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
-                          <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
-                      </md-card-header>
+                  <md-card style="max-width: 360px" >
+                    <md-card-header>
+                      <md-avatar>
+                          <img :src="post.publisherAvatar" :alt="post.publisher">
+                      </md-avatar>
+                      <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
+                      <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
+                    </md-card-header>
 
-                      <md-card-media v-if="post.picture">
-                          <md-card-media>
-                              <img :src="post.picture">
-                          </md-card-media>
+                    <md-card-media v-if="post.picture">
+                      <md-card-media>
+                          <img :src="post.picture">
                       </md-card-media>
+                    </md-card-media>
 
-                      <md-card-content>
-                          {{post.message}}
-                      </md-card-content>
+                    <md-card-content>
+                      {{post.message}}
+                    </md-card-content>
 
-                      <md-card-actions>
-                          <md-button>
-                            <span style="vertical-align:middle; color: #ee5253; margin: auto;">
-                              <i class="material-icons">favorite_border</i>
-                              {{post.like_count}}
-                            </span>
-                          </md-button>
-                          <md-button>
-                            <span style="vertical-align:middle; margin: auto; color: #576574;">
-                              <i class="material-icons">comment</i>
-                              {{post.comment_count}}
-                            </span>
-                          </md-button>
-                          <md-button>
-                            <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
-                              <i class="material-icons">bookmark_border</i>
-                              {{post.share_count}}
-                            </span>
-                          </md-button>
-                          <md-button class="ml-auto">
-                            <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
-                              <i class="material-icons">description</i>
-                            </a>
-                          </md-button>
-                      </md-card-actions>
+                    <md-card-actions>
+                      <md-button>
+                        <span style="vertical-align:middle; color: #ee5253; margin: auto;">
+                          <i class="material-icons">favorite_border</i>
+                          {{post.like_count}}
+                        </span>
+                      </md-button>
+                      <md-button>
+                        <span style="vertical-align:middle; margin: auto; color: #576574;">
+                          <i class="material-icons">comment</i>
+                          {{post.comment_count}}
+                        </span>
+                      </md-button>
+                      <md-button>
+                        <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
+                          <i class="material-icons">bookmark_border</i>
+                          {{post.share_count}}
+                        </span>
+                      </md-button>
+                      <md-button class="ml-auto">
+                        <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
+                          <i class="material-icons">description</i>
+                        </a>
+                      </md-button>
+                    </md-card-actions>
                   </md-card>
                 </div>
               </div>
             </div>
             <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
           </div>
+          <login-form :showDialog="showDialog" @closeDialog="closeDialog" @userLoggedIn='getUser'></login-form>
         </md-app-content>
       </md-app>
-      <login-form :showDialog="showDialog" @closeDialog="closeDialog"></login-form>
     </div>
 </template>
 
@@ -163,6 +177,9 @@ export default {
     this.getPosts()
   },
   methods: {
+    getUser: function (user) {
+      this.user = user
+    },
     getPosts: function (category) {
       this.isLoading = true
       if (category) {
@@ -246,13 +263,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~vue-material/dist/theme/engine";
-
-@include md-register-theme("default", (
-  primary: md-get-palette-color(blue, A200)
-));
-
-@import "~vue-material/dist/theme/all";
 h1, h2 {
   font-weight: normal;
 }
