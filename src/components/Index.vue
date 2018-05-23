@@ -1,6 +1,6 @@
 <template>
     <div class="page-container">
-      <md-app md-waterfall md-mode="fixed">
+      <md-app md-waterfall>
         <md-app-toolbar class="md-accent" md-elevation="1">
           <md-button class="md-icon-button" @click="toggleMenu" v-if="!menuVisible">
             <md-icon>menu</md-icon>
@@ -149,7 +149,6 @@
 </template>
 
 <script>
-/* global $:true */
 /* eslint no-undef: "error" */
 import InfiniteLoading from 'vue-infinite-loading'
 import { FulfillingSquareSpinner } from 'epic-spinners'
@@ -277,6 +276,8 @@ export default {
         this.showErrorToast('Oops... Bạn cần đăng nhập trước nhé !')
       } else {
         this.showCustomPage = true
+        this.restPosts = []
+        this.posts = []
       }
     },
     showErrorToast: function (message) {
@@ -287,7 +288,7 @@ export default {
         action: {
           icon: 'fingerprint',
           onClick: () => {
-            $('#loginModal').modal('toggle')
+            this.showDialog = true
           }
         }
       })
