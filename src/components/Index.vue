@@ -68,8 +68,11 @@
             </md-list-item>
           </md-list>
         </md-app-drawer>
-        <md-app-content class="md-scrollbar">
+        <md-app-content>
           <div>
+            <div v-if="showCustomPage">
+              <custom-page :user="user"></custom-page>
+            </div>
             <div v-if="isLoading">
               <fulfilling-square-spinner
                   :animation-duration="4000"
@@ -78,19 +81,23 @@
                   style="display: block; margin: 50px auto auto auto;"
                 />
             </div>
-            <div v-else>
+            <div v-if="!isLoading">
               <md-field>
                 <label>Tìm kiếm...</label>
                 <md-input v-model="searchText"></md-input>
               </md-field>
               <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
                 <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                  <md-card style="max-width: 360px" >
+                  <md-card style="max-width: 400px" >
                     <md-card-header>
                       <md-avatar>
                           <img :src="post.publisherAvatar" :alt="post.publisher">
                       </md-avatar>
-                      <div class="md-title" style="padding-left: 0">{{post.publisher}}</div>
+                      <div class="md-title">
+                        {{post.publisher}}
+                        <md-switch v-if="user" v-model="user.posts" :value="post.postId" @change="handleSavedPost(post.postId)"></md-switch>
+                      </div>
+
                       <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
                     </md-card-header>
 
@@ -131,11 +138,11 @@
                     </md-card-actions>
                   </md-card>
                 </div>
+                <infinite-loading spinner="waveDots"  @infinite="showMorePosts"></infinite-loading>
               </div>
             </div>
-            <!-- <infinite-loading @infinite="showPosts"></infinite-loading> -->
+            <login-form :showDialog="showDialog" @closeDialog="closeDialog" @userLoggedIn='getUser'></login-form>
           </div>
-          <login-form :showDialog="showDialog" @closeDialog="closeDialog" @userLoggedIn='getUser'></login-form>
         </md-app-content>
       </md-app>
     </div>
@@ -147,11 +154,14 @@
 import InfiniteLoading from 'vue-infinite-loading'
 import { FulfillingSquareSpinner } from 'epic-spinners'
 import LoginForm from './Login'
+import CustomPage from './CustomPage'
 export default {
   name: 'Index',
   data () {
     return {
       title: 'TRENDEZ',
+      // apiUrl: 'http://localhost:6868',
+      apiUrl: 'https://trendez-server.herokuapp.com',
       posts: [],
       restPosts: [],
       count: 0,
@@ -159,7 +169,8 @@ export default {
       user: null,
       menuVisible: true,
       isLoading: true,
-      showDialog: false
+      showDialog: false,
+      showCustomPage: false
     }
   },
   computed: {
@@ -169,7 +180,7 @@ export default {
         return this.posts
       }
       return this.posts.filter(function (post) {
-        return post.message.indexOf(self.searchText) >= 0
+        return post.message.indexOf(self.searchText) >= 0 || post.publisher.indexOf(self.searchText) >= 0
       })
     }
   },
@@ -200,45 +211,76 @@ export default {
         this.$http.get('https://trendez-server.herokuapp.com/api/get-posts').then((response) => {
           this.isLoading = false
           this.restPosts = response.body
-          this.posts = this.restPosts.slice(1, 10)
+          if (this.restPosts.length >= 10) {
+            this.posts = this.restPosts.slice(1, 10)
+          } else {
+            this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
+          }
         })
       }
     },
-    showPosts: function ($state) {
-      // console.log('qeqweqwe')/
-      // setTimeout(() => {
-      //   if (this.count + 10 < this.restPosts.length) {
-      //     this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + 10))
-      //     this.count += 10
-      //   } else {
-      //     this.posts = this.posts.concat(this.restPosts.slice(this.count, this.count + (this.restPosts.length - this.count)))
-      //     this.count += this.restPosts.length - this.count
-      //   }
-      //   $state.loaded()
-      // }, 1000)
+    showMorePosts: function ($state) {
+      setTimeout(() => {
+        console.log('Loading')
+        let count = this.posts.length + 1
+        if (count + 10 <= this.restPosts.length) {
+          this.posts = this.posts.concat(this.restPosts.slice(count, count + 10))
+        } else if (count < this.restPosts.length < count + 10) {
+          this.posts = this.posts.concat(this.restPosts.slice(count, this.restPosts.length - count - 1))
+        } else {
+          $state.complete()
+        }
+      }, 1000)
+    },
+    handleSavedPost: function (postId) {
+      this.$http.post(`${this.apiUrl}/api/handle-saved-post`, {
+        userId: this.user._id,
+        postId: postId
+      }).then((response) => {
+      })
     },
     changeTitle (category) {
       if (category === 'news') this.title = 'TIN TỨC'
-      if (category === 'food') this.title = 'ĂN UỐNG'
-      if (category === 'fashion') this.title = 'THỜI TRANG'
-      if (category === 'film') this.title = 'PHIM ẢNH'
-      if (category === 'sport') this.title = 'THỂ THAO'
+      else if (category === 'food') this.title = 'ĂN UỐNG'
+      else if (category === 'fashion') this.title = 'THỜI TRANG'
+      else if (category === 'film') this.title = 'PHIM ẢNH'
+      else if (category === 'sport') this.title = 'THỂ THAO'
     },
     toggleMenu () {
       this.menuVisible = !this.menuVisible
     },
     getSavedPosts: function () {
       if (!this.user) {
-        this.showToast()
+        this.showErrorToast('Oops... Bạn cần đăng nhập trước nhé !')
+      } else {
+        if (this.user.posts.length > 0) {
+          this.isLoading = true
+          this.posts = []
+          this.restPosts = []
+          this.$http.post(`${this.apiUrl}/api/get-saved-post`, {
+            userId: this.user._id
+          }).then((response) => {
+            this.isLoading = false
+            this.posts = response.body.posts
+          })
+        } else {
+          this.$toasted.error('Oops... Hình như bạn chưa có bài đăng nào !', {
+            theme: 'bubble',
+            position: 'top-right',
+            duration: 3000
+          })
+        }
       }
     },
     getFollowPages: function () {
       if (!this.user) {
-        this.showToast()
+        this.showErrorToast('Oops... Bạn cần đăng nhập trước nhé !')
+      } else {
+        this.showCustomPage = true
       }
     },
-    showToast: function () {
-      this.$toasted.error('Oops... Bạn cần đăng nhập trước nhé !', {
+    showErrorToast: function (message) {
+      this.$toasted.error(message, {
         theme: 'bubble',
         position: 'top-right',
         duration: 3000,
@@ -256,6 +298,7 @@ export default {
   },
   components: {
     LoginForm,
+    CustomPage,
     InfiniteLoading,
     FulfillingSquareSpinner
   }
@@ -296,6 +339,7 @@ a {
 }
 .md-card-header .md-title {
   flex: none;
+  text-align: left;
 }
 .md-card .md-subhead {
   text-align: justify;

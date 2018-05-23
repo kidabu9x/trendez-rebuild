@@ -118,7 +118,7 @@ export default {
   mixins: [validationMixin],
   props: ['showDialog'],
   data: () => ({
-    apiUrl: 'https://trendez-server.herokuapp.com/',
+    apiUrl: 'https://trendez-server.herokuapp.com',
     show: this.showDialog,
     registerForm: {
       firstName: null,
@@ -193,7 +193,6 @@ export default {
         username: this.loginForm.username,
         password: this.loginForm.password
       }).then((res) => {
-        console.log(res.body)
         this.sending = false
         if (!res.ok) {
           this.showErrorToast('Lỗi hệ thống !')
@@ -228,7 +227,6 @@ export default {
         password: this.registerForm.password,
         avatar: this.registerForm.avatar
       }).then((res) => {
-        console.log(res.body)
         this.sending = false
         if (!res.ok) {
           this.showErrorToast('Lỗi hệ thống !')
@@ -267,7 +265,6 @@ export default {
     },
     onSignInSuccess (res) {
       let userID = res.authResponse.userID
-      console.log(userID)
       FB.api(`/${userID}?fields=name,first_name,last_name,picture{url}`, doc => {
         let checkUser = {
           user: {
