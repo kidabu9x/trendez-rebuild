@@ -316,7 +316,7 @@ export default {
   display: block;
   margin: 30px auto;
   cursor: pointer;
-  max-width: 160px;
+  max-width: 240px;
   size: 16px;
 }
 </style>

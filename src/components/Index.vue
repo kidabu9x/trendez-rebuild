@@ -73,72 +73,88 @@
             <div v-if="showCustomPage">
               <custom-page :user="user"></custom-page>
             </div>
-            <div v-if="isLoading">
-              <fulfilling-square-spinner
-                  :animation-duration="4000"
-                  :size="50"
-                  color="#FF8800"
-                  style="display: block; margin: 50px auto auto auto;"
-                />
-            </div>
-            <div v-if="!isLoading">
-              <md-field>
-                <label>Tìm kiếm...</label>
-                <md-input v-model="searchText"></md-input>
-              </md-field>
-              <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
-                <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
-                  <md-card style="max-width: 400px" >
-                    <md-card-header>
-                      <md-avatar>
-                          <img :src="post.publisherAvatar" :alt="post.publisher">
-                      </md-avatar>
-                      <div class="md-title">
-                        {{post.publisher}}
-                        <md-switch v-if="user" v-model="user.posts" :value="post.postId" @change="handleSavedPost(post.postId)"></md-switch>
-                      </div>
+            <div v-else>
+              <div v-if="isLoading">
+                <fulfilling-square-spinner
+                    :animation-duration="4000"
+                    :size="50"
+                    color="#FF8800"
+                    style="display: block; margin: 50px auto auto auto;"
+                  />
+              </div>
+              <div v-if="!isLoading">
+                <md-field>
+                  <label>Tìm kiếm...</label>
+                  <md-input v-model="searchText"></md-input>
+                </md-field>
+                <div v-masonry origin-left="true" transition-duration="1s" item-selector=".item">
+                  <div v-masonry-tile class="item" v-for="post in postsWithSearchs" :key="post.postId" v-if="post.isPublic">
+                    <md-card style="max-width: 400px" >
+                      <md-card-header>
+                        <md-avatar>
+                            <img :src="post.publisherAvatar" :alt="post.publisher">
+                        </md-avatar>
+                        <div class="md-title">
+                          {{post.publisher}}
+                        </div>
 
-                      <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
-                    </md-card-header>
+                        <div class="md-subhead">{{post.created | moment('from', 'now') }}</div>
+                      </md-card-header>
 
-                    <md-card-media v-if="post.picture">
-                      <md-card-media>
-                          <img :src="post.picture">
+                      <md-card-media v-if="post.picture">
+                        <md-card-media>
+                            <img :src="post.picture">
+                        </md-card-media>
                       </md-card-media>
-                    </md-card-media>
 
-                    <md-card-content>
-                      {{post.message}}
-                    </md-card-content>
+                      <md-card-content>
+                        {{post.message}}
+                      </md-card-content>
 
-                    <md-card-actions>
-                      <md-button>
-                        <span style="vertical-align:middle; color: #ee5253; margin: auto;">
-                          <i class="material-icons">favorite_border</i>
-                          {{post.like_count}}
-                        </span>
-                      </md-button>
-                      <md-button>
-                        <span style="vertical-align:middle; margin: auto; color: #576574;">
-                          <i class="material-icons">comment</i>
-                          {{post.comment_count}}
-                        </span>
-                      </md-button>
-                      <md-button>
-                        <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
-                          <i class="material-icons">bookmark_border</i>
-                          {{post.share_count}}
-                        </span>
-                      </md-button>
-                      <md-button class="ml-auto">
-                        <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
-                          <i class="material-icons">description</i>
-                        </a>
-                      </md-button>
-                    </md-card-actions>
-                  </md-card>
+                      <md-card-actions>
+                        <div class="md-layout">
+                          <div class="md-layout-item md-size-20">
+                            <md-button>
+                              <span style="vertical-align:middle; color: #ee5253; margin: auto;">
+                                <i class="material-icons">favorite</i>
+                                {{post.like_count}}
+                              </span>
+                            </md-button>
+                          </div>
+                          <div class="md-layout-item md-size-20">
+                            <md-button>
+                              <span style="vertical-align:middle; margin: auto; color: #576574;">
+                                <i class="material-icons">comment</i>
+                                {{post.comment_count}}
+                              </span>
+                            </md-button>
+                          </div>
+                          <div class="md-layout-item md-size-20">
+                            <md-button>
+                              <span style="vertical-align:middle; color: #ff9f43; margin: auto;">
+                                <i class="material-icons">bookmark</i>
+                                {{post.share_count}}
+                              </span>
+                            </md-button>
+                          </div>
+                          <div class="md-layout-item md-size-20">
+                            <md-button class="ml-auto">
+                              <a style="vertical-align:middle; color: #3F729B; margin: auto;" :href="post.link" target="_blank" title="Xem bài đăng gốc trên Facebook">
+                                <i class="material-icons">description</i>
+                              </a>
+                            </md-button>
+                          </div>
+                          <div class="md-layout-item md-size-20" v-if="user">
+                            <md-button>
+                              <md-switch  v-model="user.posts" :value="post.postId" @change="handleSavedPost(post.postId)"></md-switch>
+                            </md-button>
+                          </div>
+                        </div>
+                      </md-card-actions>
+                    </md-card>
+                  </div>
+                  <!-- <infinite-loading spinner="waveDots"  @infinite="showMorePosts"></infinite-loading> -->
                 </div>
-                <infinite-loading spinner="waveDots"  @infinite="showMorePosts"></infinite-loading>
               </div>
             </div>
             <login-form :showDialog="showDialog" @closeDialog="closeDialog" @userLoggedIn='getUser'></login-form>
@@ -239,6 +255,7 @@ export default {
       })
     },
     changeTitle (category) {
+      this.showCustomPage = false
       if (category === 'news') this.title = 'TIN TỨC'
       else if (category === 'food') this.title = 'ĂN UỐNG'
       else if (category === 'fashion') this.title = 'THỜI TRANG'
@@ -249,10 +266,12 @@ export default {
       this.menuVisible = !this.menuVisible
     },
     getSavedPosts: function () {
+      this.showCustomPage = false
       if (!this.user) {
         this.showErrorToast('Oops... Bạn cần đăng nhập trước nhé !')
       } else {
         if (this.user.posts.length > 0) {
+          this.title = 'BÀI ĐÃ LƯU'
           this.isLoading = true
           this.posts = []
           this.restPosts = []
