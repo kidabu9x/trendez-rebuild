@@ -49,7 +49,7 @@
           <md-table-cell>{{page.pageLikes}}</md-table-cell>
           <md-table-cell>{{page.posts.length}}</md-table-cell>
           <md-table-cell>
-            <md-button class="md-icon-button md-accent" @click="deleteFavPage(page.pageId)">
+            <md-button class="md-icon-button md-accent" @click="deleteFavPage(page.pageId)" title="Xóa">
               <md-icon>delete</md-icon>
             </md-button>
           </md-table-cell>
@@ -150,8 +150,8 @@ export default {
   props: ['user'],
   data () {
     return {
-      // apiUrl: 'https://trendez-server.herokuapp.com',
-      apiUrl: 'http://localhost:6868',
+      apiUrl: 'https://trendez-server.herokuapp.com',
+      // apiUrl: 'http://localhost:6868',
       fakeUser: this.user,
       pageUrl: '',
       loadUserInfo: true,
@@ -189,7 +189,6 @@ export default {
     getFavPosts () {
       this.isLoading = true
       this.$http.get(`${this.apiUrl}/api/get-favorite-posts?userid=${this.fakeUser._id}`).then(res => {
-        console.log(res)
         this.isLoading = false
         if (res.body.length > 0) {
           this.restPosts = this.restPosts.concat(res.body)
@@ -236,6 +235,13 @@ export default {
         }
       })
     },
+    handleSavedPost: function (postId) {
+      this.$http.post(`${this.apiUrl}/api/handle-saved-post`, {
+        userId: this.user._id,
+        postId: postId
+      }).then((response) => {
+      })
+    },
     showErrorToast: function (message) {
       this.$toasted.error(message, {
         theme: 'bubble',
@@ -276,5 +282,109 @@ export default {
   cursor: pointer;
   max-width: 160px;
   size: 16px;
+}
+
+h1, h2 {
+  font-weight: normal;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: block;
+  margin: 0 10px;
+}
+.col-title {
+  text-align: left;
+}
+p {
+  text-align: left;
+}
+a {
+  color: #42b983;
+}
+
+.item {
+  margin: 5px;
+}
+
+.md-card {
+  width: 100%;
+  margin: 4px;
+  vertical-align: top;
+  overflow: hidden;
+}
+.md-card-header .md-title {
+  flex: none;
+  text-align: left;
+}
+.md-card .md-subhead {
+  text-align: justify;
+}
+.md-card-header+.md-card-content {
+  text-align: justify;
+}
+.md-card-content {
+  text-align: justify;
+}
+.md-card-actions {
+  justify-content: left !important;
+}
+.md-card-actions .md-button {
+  border-radius: 2px;
+  color: #000;
+}
+.md-card-actions .md-button i {
+  display: inline-block;
+}
+.md-card-actions .md-button span {
+  display: inline-block;
+}
+
+.md-subhead {
+    .md-icon {
+    $size: 16px;
+    width: $size;
+    min-width: $size;
+    height: $size;
+    font-size: $size !important;
+    }
+
+    span {
+    vertical-align: middle;
+    }
+}
+
+.card-reservation {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .md-icon {
+    margin: 8px;
+    }
+}
+
+.md-button-group {
+    display: flex;
+
+    .md-button {
+    min-width: 60px;
+    border-radius: 2px;
+    }
+}
+.md-app {
+  min-height: 350px;
+  border: 1px solid rgba(#000, .12);
+}
+  // Demo purposes only
+.md-drawer {
+  width: 230px;
+  max-width: calc(100vw - 125px);
+}
+.md-card-drawer {
+  position: sticky;
 }
 </style>

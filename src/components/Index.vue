@@ -153,8 +153,8 @@
                       </md-card-actions>
                     </md-card>
                   </div>
-                  <!-- <infinite-loading spinner="waveDots"  @infinite="showMorePosts"></infinite-loading> -->
                 </div>
+                <!-- <infinite-loading spinner="waveDots"  @infinite="showMorePosts"></infinite-loading> -->
               </div>
             </div>
             <login-form :showDialog="showDialog" @closeDialog="closeDialog" @userLoggedIn='getUser'></login-form>
@@ -185,7 +185,8 @@ export default {
       menuVisible: true,
       isLoading: true,
       showDialog: false,
-      showCustomPage: false
+      showCustomPage: false,
+      enableInfiScroll: false
     }
   },
   computed: {
@@ -211,41 +212,48 @@ export default {
       if (category) {
         this.changeTitle(category)
         this.posts = []
-        this.$http.get(`https://trendez-server.herokuapp.com/api/get-posts?category=${category}`).then((response) => {
+        this.$http.get(`${this.apiUrl}/api/get-posts?category=${category}`).then((response) => {
           this.isLoading = false
           this.restPosts = response.body
           if (this.restPosts.length >= 10) {
             this.posts = this.restPosts.slice(1, 10)
           } else {
             this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
+            this.enableInfiScroll = true
           }
         })
       } else {
         this.title = 'TRENDEZ'
         this.posts = []
-        this.$http.get('https://trendez-server.herokuapp.com/api/get-posts').then((response) => {
+        this.showCustomPage = false
+        this.$http.get(`${this.apiUrl}/api/get-posts`).then((response) => {
           this.isLoading = false
           this.restPosts = response.body
           if (this.restPosts.length >= 10) {
             this.posts = this.restPosts.slice(1, 10)
           } else {
             this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
+            this.enableInfiScroll = true
           }
         })
       }
     },
     showMorePosts: function ($state) {
-      setTimeout(() => {
-        console.log('Loading')
-        let count = this.posts.length + 1
-        if (count + 10 <= this.restPosts.length) {
-          this.posts = this.posts.concat(this.restPosts.slice(count, count + 10))
-        } else if (count < this.restPosts.length < count + 10) {
-          this.posts = this.posts.concat(this.restPosts.slice(count, this.restPosts.length - count - 1))
-        } else {
-          $state.complete()
-        }
-      }, 1000)
+      if (this.enableInfiScroll) {
+        setTimeout(() => {
+          let count = this.posts.length + 1
+          if (count + 10 <= this.restPosts.length) {
+            this.posts = this.posts.concat(this.restPosts.slice(count, count + 10))
+            $state.loaded()
+          } else if (count < this.restPosts.length < count + 10) {
+            this.posts = this.posts.concat(this.restPosts.slice(count, this.restPosts.length - count - 1))
+            $state.loaded()
+          } else {
+            this.enableInfiScroll = false
+            $state.complete()
+          }
+        }, 1000)
+      }
     },
     handleSavedPost: function (postId) {
       this.$http.post(`${this.apiUrl}/api/handle-saved-post`, {
@@ -294,6 +302,7 @@ export default {
       if (!this.user) {
         this.showErrorToast('Oops... Bạn cần đăng nhập trước nhé !')
       } else {
+        this.title = 'TRANG THEO DÕI CÁ NHÂN'
         this.showCustomPage = true
         this.restPosts = []
         this.posts = []
@@ -347,7 +356,7 @@ a {
   color: #42b983;
 }
 
-.items {
+.item {
   margin: 5px;
 }
 

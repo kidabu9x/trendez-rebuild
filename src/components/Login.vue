@@ -1,7 +1,9 @@
 <template>
   <div>
     <md-dialog :md-active.sync="show" @md-closed="updateShowDialog" :md-backdrop='true'>
-      <md-dialog-title></md-dialog-title>
+      <md-dialog-title style="margin: auto;">
+        <img src="../assets/logo-trendez-2.png" width="140">
+      </md-dialog-title>
 
       <md-tabs md-dynamic-height md-alignment="centered">
         <md-tab md-label="Đăng nhập" md-icon='fingerprint'>
