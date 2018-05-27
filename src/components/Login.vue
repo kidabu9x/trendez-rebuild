@@ -202,7 +202,10 @@ export default {
         } else if (res.body.error) {
           this.showErrorToast(res.body.error)
         } else {
-          this.lastUser = res.body.user
+          let user = res.body.user
+          user.posts = res.body.listIds
+          this.lastUser = user
+          // this.lastUser = res.body.user
           this.clearLoginForm()
           this.updateShowDialog()
           this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} quay trở lại !`)
@@ -236,7 +239,10 @@ export default {
         } else if (res.body.error) {
           this.showErrorToast(res.body.error)
         } else {
-          this.lastUser = res.body.user
+          let user = res.body.user
+          user.posts = res.body.listIds
+          this.lastUser = user
+          // this.lastUser = res.body.user
           this.clearRegisterForm()
           this.updateShowDialog()
           this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} đến với TRENDEZ !`)
@@ -281,7 +287,9 @@ export default {
           if (data.body.error) {
             this.showErrorToast(data.error)
           } else {
-            this.lastUser = data.body.user
+            let user = data.body.user
+            user.posts = data.body.listIds
+            this.lastUser = user
             this.updateShowDialog()
             this.showSuccessToast(`Chào mừng ${this.lastUser.firstName} ${this.lastUser.lastName} đến với TRENDEZ !`)
             this.$emit('userLoggedIn', this.lastUser)

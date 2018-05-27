@@ -187,7 +187,6 @@ export default {
     getFavPosts () {
       this.isLoading = true
       this.$http.get(`${this.apiUrl}/api/get-favorite-posts?userid=${this.fakeUser._id}`).then(res => {
-        console.log(res)
         this.isLoading = false
         if (res.body && res.body.length > 0) {
           this.restPosts = this.restPosts.concat(res.body)
