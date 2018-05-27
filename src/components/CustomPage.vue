@@ -148,8 +148,8 @@ export default {
   props: ['user'],
   data () {
     return {
-      // apiUrl: 'https://trendez-server.herokuapp.com',
-      apiUrl: 'http://localhost:6868',
+      apiUrl: 'https://trendez-server.herokuapp.com',
+      // apiUrl: 'http://localhost:6868',
       fakeUser: this.user,
       pageUrl: '',
       loadUserInfo: true,
@@ -191,8 +191,8 @@ export default {
         this.isLoading = false
         if (res.body && res.body.length > 0) {
           this.restPosts = this.restPosts.concat(res.body)
-          if (this.restPosts.length >= 10) {
-            this.posts = this.restPosts.slice(1, 10)
+          if (this.restPosts.length >= 30) {
+            this.posts = this.restPosts.slice(1, 30)
           } else {
             this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
           }

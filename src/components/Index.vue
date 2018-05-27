@@ -175,8 +175,8 @@ export default {
   data () {
     return {
       title: 'TRENDEZ',
-      apiUrl: 'http://localhost:6868',
-      // apiUrl: 'https://trendez-server.herokuapp.com',
+      // apiUrl: 'http://localhost:6868',
+      apiUrl: 'https://trendez-server.herokuapp.com',
       posts: [],
       restPosts: [],
       count: 0,
@@ -215,8 +215,8 @@ export default {
         this.$http.get(`${this.apiUrl}/api/get-posts?category=${category}`).then((response) => {
           this.isLoading = false
           this.restPosts = response.body
-          if (this.restPosts.length >= 10) {
-            this.posts = this.restPosts.slice(1, 10)
+          if (this.restPosts.length >= 30) {
+            this.posts = this.restPosts.slice(1, 30)
           } else {
             this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
             this.enableInfiScroll = true
@@ -229,8 +229,8 @@ export default {
         this.$http.get(`${this.apiUrl}/api/get-posts`).then((response) => {
           this.isLoading = false
           this.restPosts = response.body
-          if (this.restPosts.length >= 10) {
-            this.posts = this.restPosts.slice(1, 10)
+          if (this.restPosts.length >= 30) {
+            this.posts = this.restPosts.slice(1, 30)
           } else {
             this.posts = this.restPosts.slice(1, this.restPosts.length - 1)
             this.enableInfiScroll = true
