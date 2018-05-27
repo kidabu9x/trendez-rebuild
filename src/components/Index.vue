@@ -175,8 +175,8 @@ export default {
   data () {
     return {
       title: 'TRENDEZ',
-      // apiUrl: 'http://localhost:6868',
-      apiUrl: 'https://trendez-server.herokuapp.com',
+      apiUrl: 'http://localhost:6868',
+      // apiUrl: 'https://trendez-server.herokuapp.com',
       posts: [],
       restPosts: [],
       count: 0,

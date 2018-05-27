@@ -120,7 +120,8 @@ export default {
   mixins: [validationMixin],
   props: ['showDialog'],
   data: () => ({
-    apiUrl: 'https://trendez-server.herokuapp.com',
+    apiUrl: 'http://localhost:6868',
+    // apiUrl: 'https://trendez-server.herokuapp.com',
     show: this.showDialog,
     registerForm: {
       firstName: null,

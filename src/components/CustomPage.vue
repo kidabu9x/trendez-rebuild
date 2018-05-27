@@ -40,14 +40,12 @@
         <md-table-row>
           <md-table-head>Tên trang</md-table-head>
           <md-table-head>Số theo dõi</md-table-head>
-          <md-table-head>Số bài đăng</md-table-head>
           <md-table-head>Tác vụ</md-table-head>
         </md-table-row>
 
         <md-table-row v-for="page in pages" :key="page.pageId" v-if="pages.length > 0">
           <md-table-cell>{{page.pageName}}</md-table-cell>
           <md-table-cell>{{page.pageLikes}}</md-table-cell>
-          <md-table-cell>{{page.posts.length}}</md-table-cell>
           <md-table-cell>
             <md-button class="md-icon-button md-accent" @click="deleteFavPage(page.pageId)" title="Xóa">
               <md-icon>delete</md-icon>
@@ -122,7 +120,7 @@
                   </md-button>
                 </div>
                 <div class="md-layout-item md-size-20" v-if="user">
-                  <md-button>
+                  <md-button title="Lưu bài đăng">
                     <md-switch  v-model="user.posts" :value="post.postId" @change="handleSavedPost(post.postId)"></md-switch>
                   </md-button>
                 </div>
@@ -150,8 +148,8 @@ export default {
   props: ['user'],
   data () {
     return {
-      apiUrl: 'https://trendez-server.herokuapp.com',
-      // apiUrl: 'http://localhost:6868',
+      // apiUrl: 'https://trendez-server.herokuapp.com',
+      apiUrl: 'http://localhost:6868',
       fakeUser: this.user,
       pageUrl: '',
       loadUserInfo: true,
@@ -189,8 +187,9 @@ export default {
     getFavPosts () {
       this.isLoading = true
       this.$http.get(`${this.apiUrl}/api/get-favorite-posts?userid=${this.fakeUser._id}`).then(res => {
+        console.log(res)
         this.isLoading = false
-        if (res.body.length > 0) {
+        if (res.body && res.body.length > 0) {
           this.restPosts = this.restPosts.concat(res.body)
           if (this.restPosts.length >= 10) {
             this.posts = this.restPosts.slice(1, 10)
